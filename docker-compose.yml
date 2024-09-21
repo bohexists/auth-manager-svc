@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: auth_manager_db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - auth_manager_network
+    restart: unless-stopped
+
+  auth_manager_svc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auth_manager_svc
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DSN: postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - auth_manager_network
+
+volumes:
+  postgres_data:
+
+networks:
+  auth_manager_network:
+    driver: bridge
