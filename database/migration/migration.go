@@ -1,32 +1,30 @@
 package migration
 
 import (
-	"database/sql"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"log"
 
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/bohexists/auth-manager-svc/config"
 )
 
-// ApplyMigrations applies the database migrations
-func ApplyMigrations(db *sql.DB) {
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+// ApplyMigrations applies migrations to the given database connection
+func ApplyMigrations(cfg *config.Config) {
+	// Используем строку подключения к базе данных из конфигурации
+	dbConnStr := cfg.DBDSN
+
+	// Используем путь к миграциям и строку подключения
+	m, err := migrate.New(
+		"file:///app/database/migrations",
+		dbConnStr)
+
 	if err != nil {
-		log.Fatalf("Could not create migration driver: %v", err)
+		log.Fatal("Migration failed: ", err)
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://database/migrations", // Path to migrations folder
-		"postgres", driver)
-	if err != nil {
-		log.Fatalf("Migration failed: %v", err)
-	}
-
-	// Apply all migrations
+	// Применяем миграции
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("Could not apply migrations: %v", err)
+		log.Fatal("Could not apply migrations: ", err)
 	}
-
-	log.Println("Migrations applied successfully.")
 }

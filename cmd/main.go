@@ -23,14 +23,8 @@ func main() {
 		log.Fatal("Failed to connect to database: ", err)
 	}
 
-	// Call raw database connection for migrations
-	sqlDB, err := db.DB()
-	if err != nil {
-		log.Fatal("Failed to get raw database connection: ", err)
-	}
-
-	// Apply migrations
-	migration.ApplyMigrations(sqlDB)
+	// Apply migrations, передаем объект конфигурации
+	migration.ApplyMigrations(cfg)
 
 	// Initialize repositories and services
 	userRepo := user.NewUserRepository(db)
