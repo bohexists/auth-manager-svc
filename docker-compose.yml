@@ -5,9 +5,9 @@ services:
     image: postgres:13
     container_name: auth_manager_db
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: auth_manager_user
+      POSTGRES_PASSWORD: supersecretpassword
+      POSTGRES_DB: auth_manager_db
     ports:
       - "5432:5432"
     volumes:
@@ -15,25 +15,29 @@ services:
     networks:
       - auth_manager_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_manager_user -d auth_manager_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   auth_manager_svc:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: auth_manager_svc
-    env_file:
-      - .env
     environment:
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
+      DB_USER: auth_manager_user
+      DB_PASSWORD: supersecretpassword
+      DB_NAME: auth_manager_db
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_DSN: postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+      DB_DSN: postgres://auth_manager_user:supersecretpassword@postgres:5432/auth_manager_db?sslmode=disable
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - auth_manager_network
     restart: unless-stopped

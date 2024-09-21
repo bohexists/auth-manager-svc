@@ -1,30 +1,43 @@
 package migration
 
 import (
+	"github.com/bohexists/auth-manager-svc/config"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"log"
-
-	"github.com/bohexists/auth-manager-svc/config"
 )
 
 // ApplyMigrations applies migrations to the given database connection
 func ApplyMigrations(cfg *config.Config) {
-	// Используем строку подключения к базе данных из конфигурации
+	// Log database connection string
+	log.Printf("Starting migration with DB connection string: %s", cfg.DBDSN)
+
+	// Get database connection string
 	dbConnStr := cfg.DBDSN
 
-	// Используем путь к миграциям и строку подключения
-	m, err := migrate.New(
-		"file:///app/database/migrations",
-		dbConnStr)
+	// Log migration path
+	migrationPath := "file:///app/database/migrations"
+	log.Printf("Using migration path: %s", migrationPath)
 
+	// Log migrations
+	log.Println("Initializing migrations...")
+
+	// Log connection
+	log.Println("Connecting to database...")
+
+	m, err := migrate.New(migrationPath, dbConnStr)
 	if err != nil {
-		log.Fatal("Migration failed: ", err)
+		log.Fatalf("Migration initialization failed: %v", err)
 	}
 
-	// Применяем миграции
+	// Apply migrations with log
+	log.Println("Applying migrations...")
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatal("Could not apply migrations: ", err)
+		log.Fatalf("Could not apply migrations: %v", err)
+	} else if err == migrate.ErrNoChange {
+		log.Println("No new migrations to apply")
+	} else {
+		log.Println("Migrations applied successfully")
 	}
 }

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 )
@@ -15,13 +14,10 @@ type Config struct {
 	DBDSN      string
 }
 
-// LoadConfig loads environment variables from .env file
+// LoadConfig loads environment variables from Docker environment
 func LoadConfig() *Config {
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found, using environment variables")
-	}
-
-	return &Config{
+	// Если файл .env не найден, используем переменные среды из контейнера
+	config := &Config{
 		DBUser:     getEnv("DB_USER", ""),
 		DBPassword: getEnv("DB_PASSWORD", ""),
 		DBName:     getEnv("DB_NAME", ""),
@@ -29,13 +25,17 @@ func LoadConfig() *Config {
 		DBPort:     getEnv("DB_PORT", "5432"),
 		DBDSN:      getEnv("DB_DSN", ""),
 	}
+
+	return config
 }
 
 // Helper function to retrieve environment variables or set a default value
 func getEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
 	if value == "" {
+		log.Printf("Environment variable %s not found, using default value: %s", key, defaultValue)
 		return defaultValue
 	}
+	log.Printf("Environment variable %s loaded with value: %s", key, value)
 	return value
 }
