@@ -40,7 +40,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "user created successfully"})
 }
 
-// Login handles user login requests
+// Login with JWT token generation
 func (h *AuthHandler) Login(c *gin.Context) {
 	var request struct {
 		Email    string `json:"email" binding:"required,email"`
@@ -52,12 +52,20 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Call the service layer to authenticate the user
+	// Call the service layer to login the user
 	user, err := h.authService.Login(request.Email, request.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "login successful", "user": user})
+	// Generate the JWT token
+	token, err := h.authService.GenerateToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+		return
+	}
+
+	// Return the JWT token
+	c.JSON(http.StatusOK, gin.H{"message": "login successful", "token": token})
 }

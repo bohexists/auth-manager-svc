@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/bohexists/auth-manager-svc/database/migration"
+	"github.com/bohexists/auth-manager-svc/pkg/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -36,12 +37,18 @@ func main() {
 	// Initialize repositories and services
 	log.Println("Initializing repositories and services...")
 	userRepo := user.NewUserRepository(db)
-	authService := auth.NewAuthService(userRepo)
+	jwtService := auth.NewJWTService(cfg)
+	authService := auth.NewAuthService(userRepo, jwtService)
+
+	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
+
+	// Initialize JWT middleware
+	jwtMiddleware := middleware.JWTAuthMiddleware(jwtService)
 
 	// Setup routes using external router setup
 	log.Println("Setting up routes...")
-	router := routes.SetupRouter(authHandler)
+	router := routes.SetupRouter(authHandler, jwtMiddleware)
 
 	// Run the server
 	log.Println("Starting the server on port 8080...")

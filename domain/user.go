@@ -12,7 +12,7 @@ import (
 type User struct {
 	ID        int64     `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	Email     string    `gorm:"uniqueIndex;not null" json:"email" binding:"required,email"`
-	Password  string    `gorm:"not null" json:"-" binding:"required,min=8"`
+	Password  string    `gorm:"not null" json:"password" binding:"required,min=8"`
 	IsActive  bool      `gorm:"default:false" json:"is_active"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
