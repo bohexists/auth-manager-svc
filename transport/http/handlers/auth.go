@@ -52,11 +52,20 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.Login(request.Email, request.Password)
+	// Call the service layer to login the user
+	user, err := h.authService.Login(request.Email, request.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
+	// Generate the JWT token
+	token, err := h.authService.GenerateToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+		return
+	}
+
+	// Return the JWT token
 	c.JSON(http.StatusOK, gin.H{"message": "login successful", "token": token})
 }

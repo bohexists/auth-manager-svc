@@ -47,3 +47,9 @@ func (s *AuthService) Login(email, password string) (*domain.User, error) {
 
 	return user, nil
 }
+
+// GenerateToken creates a new JWT token
+func (s *AuthService) GenerateToken(userID int64) (string, error) {
+	// Generate the JWT token
+	return s.jwtService.GenerateToken(userID)
+}
