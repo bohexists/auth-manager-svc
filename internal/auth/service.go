@@ -8,11 +8,12 @@ import (
 )
 
 type AuthService struct {
-	userRepo *user.UserRepository
+	userRepo   *user.UserRepository
+	jwtService JWTService
 }
 
-func NewAuthService(userRepo *user.UserRepository) *AuthService {
-	return &AuthService{userRepo: userRepo}
+func NewAuthService(userRepo *user.UserRepository, jwtService JWTService) *AuthService {
+	return &AuthService{userRepo: userRepo, jwtService: jwtService}
 }
 
 // Register handles user registration logic
