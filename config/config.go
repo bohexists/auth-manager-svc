@@ -12,6 +12,7 @@ type Config struct {
 	DBHost     string
 	DBPort     string
 	DBDSN      string
+	JWTSecret  string
 }
 
 // LoadConfig loads environment variables from Docker environment
@@ -24,6 +25,7 @@ func LoadConfig() *Config {
 		DBHost:     getEnv("DB_HOST", ""),
 		DBPort:     getEnv("DB_PORT", "5432"),
 		DBDSN:      getEnv("DB_DSN", ""),
+		JWTSecret:  getEnv("JWT_SECRET", "secret-key"),
 	}
 
 	return config

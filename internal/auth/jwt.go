@@ -2,9 +2,11 @@ package auth
 
 import (
 	"fmt"
-	"github.com/golang-jwt/jwt/v4"
-	"os"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
+
+	"github.com/bohexists/auth-manager-svc/config"
 )
 
 type JWTService interface {
@@ -22,13 +24,9 @@ type jwtService struct {
 	issuer    string
 }
 
-func NewJWTService() JWTService {
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		secret = "your-secret-key" // default fallback
-	}
+func NewJWTService(cfg *config.Config) JWTService {
 	return &jwtService{
-		secretKey: secret,
+		secretKey: cfg.JWTSecret,
 		issuer:    "auth_manager",
 	}
 }

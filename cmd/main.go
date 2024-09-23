@@ -33,15 +33,20 @@ func main() {
 	log.Println("Starting to apply migrations...")
 	migration.ApplyMigrations(cfg)
 
+	// Initialize JWT service
+	jwtService := auth.NewJWTService(cfg)
+
 	// Initialize repositories and services
 	log.Println("Initializing repositories and services...")
 	userRepo := user.NewUserRepository(db)
-	authService := auth.NewAuthService(userRepo)
+	authService := auth.NewAuthService(userRepo, jwtService)
+
+	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 
 	// Setup routes using external router setup
 	log.Println("Setting up routes...")
-	router := routes.SetupRouter(authHandler)
+	router := routes.SetupRouter(authHandler, jwtService)
 
 	// Run the server
 	log.Println("Starting the server on port 8080...")
