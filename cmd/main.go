@@ -1,16 +1,16 @@
 package main
 
 import (
-	"github.com/bohexists/auth-manager-svc/database/migration"
-	"github.com/bohexists/auth-manager-svc/pkg/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
 
 	"github.com/bohexists/auth-manager-svc/config"
+	"github.com/bohexists/auth-manager-svc/database/migration"
 	"github.com/bohexists/auth-manager-svc/internal/services"
 	"github.com/bohexists/auth-manager-svc/internal/user"
 	"github.com/bohexists/auth-manager-svc/transport/http/handlers"
+	"github.com/bohexists/auth-manager-svc/transport/http/middleware"
 	"github.com/bohexists/auth-manager-svc/transport/http/router"
 )
 
