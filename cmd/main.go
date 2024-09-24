@@ -1,25 +1,22 @@
 package main
 
 import (
-	"github.com/bohexists/auth-manager-svc/database/migration"
-	"github.com/bohexists/auth-manager-svc/pkg/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
 
 	"github.com/bohexists/auth-manager-svc/config"
-	"github.com/bohexists/auth-manager-svc/internal/auth"
+	"github.com/bohexists/auth-manager-svc/database/migration"
+	"github.com/bohexists/auth-manager-svc/internal/services"
 	"github.com/bohexists/auth-manager-svc/internal/user"
 	"github.com/bohexists/auth-manager-svc/transport/http/handlers"
+	"github.com/bohexists/auth-manager-svc/transport/http/middleware"
 	"github.com/bohexists/auth-manager-svc/transport/http/router"
 )
 
 func main() {
 	// Load configuration from environment variables
 	cfg := config.LoadConfig()
-
-	// Log the database connection string
-	log.Printf("Connecting to the database using DSN: %s", cfg.DBDSN)
 
 	// Initialize database connection using DSN from config
 	db, err := gorm.Open(postgres.Open(cfg.DBDSN), &gorm.Config{})
@@ -37,17 +34,16 @@ func main() {
 	// Initialize repositories and services
 	log.Println("Initializing repositories and services...")
 	userRepo := user.NewUserRepository(db)
-	jwtService := auth.NewJWTService(cfg)
-	authService := auth.NewAuthService(userRepo, jwtService)
+	JWTService := services.NewJWTService(cfg)
+	authService := services.NewAuthService(userRepo, JWTService)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 
 	// Initialize JWT middleware
-	jwtMiddleware := middleware.JWTAuthMiddleware(jwtService)
+	jwtMiddleware := middleware.JWTAuthMiddleware(JWTService)
 
 	// Setup routes using external router setup
-	log.Println("Setting up routes...")
 	router := routes.SetupRouter(authHandler, jwtMiddleware)
 
 	// Run the server

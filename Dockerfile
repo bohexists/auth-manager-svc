@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app (binary)
-RUN go build -o auth-manager-svc cmd/main.go
+RUN go build -o services-manager-svc cmd/main.go
 
 # Use a smaller image for the final stage
 FROM alpine:3.18

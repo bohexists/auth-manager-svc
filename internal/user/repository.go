@@ -6,11 +6,17 @@ import (
 	"github.com/bohexists/auth-manager-svc/domain"
 )
 
+// UserRepository is a repository for users
+type UserRepositoryInterface interface {
+	Create(user *domain.User) error
+	FindByEmail(email string) (*domain.User, error)
+}
+
 type UserRepository struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) *UserRepository {
+func NewUserRepository(db *gorm.DB) UserRepositoryInterface {
 	return &UserRepository{db: db}
 }
 
