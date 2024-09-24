@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/bohexists/auth-manager-svc/internal/auth"
+	"github.com/bohexists/auth-manager-svc/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
-func JWTAuthMiddleware(jwtService auth.JWTService) gin.HandlerFunc {
+func JWTAuthMiddleware(jwtService *services.JWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {

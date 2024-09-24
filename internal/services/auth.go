@@ -1,4 +1,4 @@
-package auth
+package services
 
 import (
 	"errors"
@@ -7,12 +7,18 @@ import (
 	"github.com/bohexists/auth-manager-svc/internal/user"
 )
 
-type AuthService struct {
-	userRepo     *user.UserRepository
-	tokenService domain.TokenService
+// AuthServiceInterface определяет интерфейс для AuthService
+type AuthServiceInterface interface {
+	Register(user *domain.User) error
+	Login(email, password string) (*domain.User, error)
 }
 
-func NewAuthService(userRepo *user.UserRepository, tokenService domain.TokenService) *AuthService {
+type AuthService struct {
+	userRepo     user.UserRepositoryInterface
+	tokenService JWTServiceInterface
+}
+
+func NewAuthService(userRepo user.UserRepositoryInterface, tokenService JWTServiceInterface) *AuthService {
 	return &AuthService{
 		userRepo:     userRepo,
 		tokenService: tokenService,
@@ -49,15 +55,4 @@ func (s *AuthService) Login(email, password string) (*domain.User, error) {
 	}
 
 	return user, nil
-}
-
-// GenerateToken creates a new JWT token
-func (s *AuthService) GenerateToken(userID int64) (string, error) {
-	// Generate the JWT token
-	return s.tokenService.GenerateAccessToken(userID)
-}
-
-// GenerateRefreshToken creates a new refresh token
-func (s *AuthService) GenerateRefreshToken(userID int64) (string, error) {
-	return s.tokenService.GenerateRefreshToken(userID)
 }

@@ -13,7 +13,7 @@ type TokenClaims struct {
 }
 
 // TokenService interface for generating and validating tokens
-type TokenService interface {
+type TokenServiceInterface interface {
 	GenerateAccessToken(userID int64) (string, error)
 	GenerateRefreshToken(userID int64) (string, error)
 	ValidateToken(token string) (*TokenClaims, error)
@@ -24,6 +24,11 @@ type JWTService struct {
 	secretKey        string
 	refreshSecretKey string
 	issuer           string
+}
+
+func (s *JWTService) GenerateToken(userID int64) (string, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func NewJWTService(secretKey, refreshSecretKey, issuer string) *JWTService {

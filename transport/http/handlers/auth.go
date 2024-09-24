@@ -6,14 +6,14 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/bohexists/auth-manager-svc/domain"
-	"github.com/bohexists/auth-manager-svc/internal/auth"
+	"github.com/bohexists/auth-manager-svc/internal/services"
 )
 
 type AuthHandler struct {
-	authService *auth.AuthService
+	authService *services.AuthService
 }
 
-func NewAuthHandler(authService *auth.AuthService) *AuthHandler {
+func NewAuthHandler(authService *services.AuthService) *AuthHandler {
 	return &AuthHandler{authService: authService}
 }
 
@@ -59,19 +59,29 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Generate the JWT token
-	token, err := h.authService.GenerateToken(user.ID)
+	// Generate the JWT access and refresh tokens
+	accessToken, err := h.authService.GenerateToken(user.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate access token"})
 		return
 	}
 
-	// Return the JWT token
-	c.JSON(http.StatusOK, gin.H{"message": "login successful", "token": token})
+	refreshToken, err := h.authService.GenerateRefreshToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate refresh token"})
+		return
+	}
+
+	// Set refresh token in a secure cookie
+	c.SetCookie("refresh_token", refreshToken, 60*60*24*7, "/", "", false, true) // 7 days expiration, HTTPOnly
+
+	// Return the JWT access token
+	c.JSON(http.StatusOK, gin.H{"message": "login successful", "access_token": accessToken})
 }
 
 // RefreshToken обновляет access токен
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
+	// Получаем refresh токен из cookies
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "no refresh token found"})
@@ -79,15 +89,9 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	}
 
 	// Валидация рефреш токена
-	token, err := h.auth.ValidateToken(refreshToken)
-	if err != nil || !token.Valid {
+	claims, err := h.authService.ValidateToken(refreshToken)
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid refresh token"})
-		return
-	}
-
-	claims, ok := token.Claims.(*jwtCustomClaims)
-	if !ok || token.Valid == false {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims"})
 		return
 	}
 
@@ -98,5 +102,6 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": newAccessToken})
+	// Возвращаем новый access token
+	c.JSON(http.StatusOK, gin.H{"access_token": newAccessToken})
 }
