@@ -69,3 +69,34 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// Return the JWT token
 	c.JSON(http.StatusOK, gin.H{"message": "login successful", "token": token})
 }
+
+// RefreshToken обновляет access токен
+func (h *AuthHandler) RefreshToken(c *gin.Context) {
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "no refresh token found"})
+		return
+	}
+
+	// Валидация рефреш токена
+	token, err := h.auth.ValidateToken(refreshToken)
+	if err != nil || !token.Valid {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid refresh token"})
+		return
+	}
+
+	claims, ok := token.Claims.(*jwtCustomClaims)
+	if !ok || token.Valid == false {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims"})
+		return
+	}
+
+	// Генерация нового access токена
+	newAccessToken, err := h.authService.GenerateToken(claims.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate new access token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": newAccessToken})
+}

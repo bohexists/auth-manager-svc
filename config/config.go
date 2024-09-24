@@ -6,26 +6,28 @@ import (
 )
 
 type Config struct {
-	DBUser     string
-	DBPassword string
-	DBName     string
-	DBHost     string
-	DBPort     string
-	DBDSN      string
-	JWTSecret  string
+	DBUser             string
+	DBPassword         string
+	DBName             string
+	DBHost             string
+	DBPort             string
+	DBDSN              string
+	JWTSecret          string
+	RefreshTokenSecret string
 }
 
 // LoadConfig loads environment variables from Docker environment
 func LoadConfig() *Config {
 	// Если файл .env не найден, используем переменные среды из контейнера
 	config := &Config{
-		DBUser:     getEnv("DB_USER", ""),
-		DBPassword: getEnv("DB_PASSWORD", ""),
-		DBName:     getEnv("DB_NAME", ""),
-		DBHost:     getEnv("DB_HOST", ""),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		DBDSN:      getEnv("DB_DSN", ""),
-		JWTSecret:  getEnv("JWT_SECRET", "secret-key"),
+		DBUser:             getEnv("DB_USER", ""),
+		DBPassword:         getEnv("DB_PASSWORD", ""),
+		DBName:             getEnv("DB_NAME", ""),
+		DBHost:             getEnv("DB_HOST", ""),
+		DBPort:             getEnv("DB_PORT", "5432"),
+		DBDSN:              getEnv("DB_DSN", ""),
+		JWTSecret:          getEnv("JWT_SECRET", "secret-key"),
+		RefreshTokenSecret: getEnv("REFRESH_TOKEN_SECRET", "refresh-secret-key"),
 	}
 
 	return config

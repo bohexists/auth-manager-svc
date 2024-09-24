@@ -1,58 +1,38 @@
 package auth
 
 import (
-	"fmt"
-	"time"
-
-	"github.com/golang-jwt/jwt/v4"
-
 	"github.com/bohexists/auth-manager-svc/config"
+	"github.com/bohexists/auth-manager-svc/domain"
 )
 
 type JWTService interface {
 	GenerateToken(userID int64) (string, error)
-	ValidateToken(token string) (*jwt.Token, error)
-}
-
-type jwtCustomClaims struct {
-	UserID int64 `json:"user_id"`
-	jwt.StandardClaims
+	ValidateToken(token string) (*domain.TokenClaims, error)
+	GenerateRefreshToken(userID int64) (string, error)
 }
 
 type jwtService struct {
-	secretKey string
-	issuer    string
+	tokenService domain.TokenService
 }
 
 func NewJWTService(cfg *config.Config) JWTService {
+	tokenService := domain.NewJWTService(cfg.JWTSecret, cfg.RefreshTokenSecret, "auth_manager")
 	return &jwtService{
-		secretKey: cfg.JWTSecret,
-		issuer:    "auth_manager",
+		tokenService: tokenService,
 	}
 }
 
 // GenerateToken creates a new JWT token for a given user
 func (j *jwtService) GenerateToken(userID int64) (string, error) {
-	claims := &jwtCustomClaims{
-		userID,
-		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(), // 3 days expiration
-			Issuer:    j.issuer,
-			IssuedAt:  time.Now().Unix(),
-		},
-	}
+	return j.tokenService.GenerateAccessToken(userID)
+}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(j.secretKey))
+// GenerateRefreshToken creates a new refresh JWT token for a given user
+func (j *jwtService) GenerateRefreshToken(userID int64) (string, error) {
+	return j.tokenService.GenerateRefreshToken(userID)
 }
 
 // ValidateToken checks if the provided JWT token is valid
-func (j *jwtService) ValidateToken(token string) (*jwt.Token, error) {
-	return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		// Ensure signing method is HMAC
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(j.secretKey), nil
-	})
+func (j *jwtService) ValidateToken(token string) (*domain.TokenClaims, error) {
+	return j.tokenService.ValidateToken(token)
 }

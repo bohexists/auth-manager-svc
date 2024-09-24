@@ -20,7 +20,7 @@ func JWTAuthMiddleware(jwtService auth.JWTService) gin.HandlerFunc {
 		// Extract token from header
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		token, err := jwtService.ValidateToken(tokenString)
-		if err != nil || !token.Valid {
+		if err != nil || token.Valid() != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			c.Abort()
 			return

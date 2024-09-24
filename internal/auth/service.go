@@ -8,12 +8,15 @@ import (
 )
 
 type AuthService struct {
-	userRepo   *user.UserRepository
-	jwtService JWTService
+	userRepo     *user.UserRepository
+	tokenService domain.TokenService
 }
 
-func NewAuthService(userRepo *user.UserRepository, jwtService JWTService) *AuthService {
-	return &AuthService{userRepo: userRepo, jwtService: jwtService}
+func NewAuthService(userRepo *user.UserRepository, tokenService domain.TokenService) *AuthService {
+	return &AuthService{
+		userRepo:     userRepo,
+		tokenService: tokenService,
+	}
 }
 
 // Register handles user registration logic
@@ -51,5 +54,10 @@ func (s *AuthService) Login(email, password string) (*domain.User, error) {
 // GenerateToken creates a new JWT token
 func (s *AuthService) GenerateToken(userID int64) (string, error) {
 	// Generate the JWT token
-	return s.jwtService.GenerateToken(userID)
+	return s.tokenService.GenerateAccessToken(userID)
+}
+
+// GenerateRefreshToken creates a new refresh token
+func (s *AuthService) GenerateRefreshToken(userID int64) (string, error) {
+	return s.tokenService.GenerateRefreshToken(userID)
 }

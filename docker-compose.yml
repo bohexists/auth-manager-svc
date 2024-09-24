@@ -34,6 +34,7 @@ services:
       DB_PORT: 5432
       DB_DSN: postgres://auth_manager_user:supersecretpassword@postgres:5432/auth_manager_db?sslmode=disable
       JWT_SECRET: "secretkey"
+      REFRESH_TOKEN_SECRET: "refresh-secret-key"
     ports:
       - "8080:8080"
     depends_on:
