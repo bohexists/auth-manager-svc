@@ -11,10 +11,15 @@ import (
 
 type AuthHandler struct {
 	authService *services.AuthService
+	JWTService  *services.JWTService
 }
 
-func NewAuthHandler(authService *services.AuthService) *AuthHandler {
-	return &AuthHandler{authService: authService}
+func NewAuthHandler(authService *services.AuthService, JWTService *services.JWTService) *AuthHandler {
+	return &AuthHandler{
+		authService: authService,
+		JWTService:  JWTService,
+	}
+
 }
 
 // Register handles user registration requests
@@ -22,12 +27,6 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	var user domain.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request format"})
-		return
-	}
-
-	// Call the domain validation function
-	if err := user.Validate(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -60,13 +59,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Generate the JWT access and refresh tokens
-	accessToken, err := h.authService.GenerateToken(user.ID)
+	accessToken, err := h.JWTService.GenerateAccessToken(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate access token"})
 		return
 	}
 
-	refreshToken, err := h.authService.GenerateRefreshToken(user.ID)
+	refreshToken, err := h.JWTService.GenerateRefreshToken(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate refresh token"})
 		return
@@ -79,29 +78,29 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "login successful", "access_token": accessToken})
 }
 
-// RefreshToken обновляет access токен
+// RefreshToken updates the access token using the refresh token
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
-	// Получаем refresh токен из cookies
+	// Resive refresh token from cookie
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "no refresh token found"})
 		return
 	}
 
-	// Валидация рефреш токена
-	claims, err := h.authService.ValidateToken(refreshToken)
+	// Validate refresh token
+	claims, err := h.JWTService.ValidateToken(refreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid refresh token"})
 		return
 	}
 
-	// Генерация нового access токена
-	newAccessToken, err := h.authService.GenerateToken(claims.UserID)
+	// Generate new access token
+	newAccessToken, err := h.JWTService.GenerateAccessToken(claims.UserID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate new access token"})
 		return
 	}
 
-	// Возвращаем новый access token
+	// Return new access token
 	c.JSON(http.StatusOK, gin.H{"access_token": newAccessToken})
 }
