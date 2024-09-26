@@ -6,7 +6,7 @@ import (
 )
 
 type JWTServiceInterface interface {
-	GenerateToken(userID int64) (string, error)
+	GenerateAccessToken(userID int64) (string, error)
 	ValidateToken(token string) (*domain.TokenClaims, error)
 	GenerateRefreshToken(userID int64) (string, error)
 }
@@ -23,7 +23,7 @@ func NewJWTService(cfg *config.Config) *JWTService {
 }
 
 // GenerateToken creates a new JWT token for a given user
-func (j *JWTService) GenerateToken(userID int64) (string, error) {
+func (j *JWTService) GenerateAccessToken(userID int64) (string, error) {
 	return j.tokenService.GenerateAccessToken(userID)
 }
 
