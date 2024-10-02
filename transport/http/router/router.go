@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SetupRouter sets up the HTTP router
 func SetupRouter(authHandler *handlers.AuthHandler, jwtMiddleware gin.HandlerFunc) *gin.Engine {
 	router := gin.Default()
 

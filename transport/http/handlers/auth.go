@@ -9,11 +9,13 @@ import (
 	"github.com/bohexists/auth-manager-svc/internal/services"
 )
 
+// AuthHandler is a handler for repositorys authentication
 type AuthHandler struct {
 	authService *services.AuthService
 	JWTService  *services.JWTService
 }
 
+// NewAuthHandler creates a new instance of AuthHandler
 func NewAuthHandler(authService *services.AuthService, JWTService *services.JWTService) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
