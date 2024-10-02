@@ -39,7 +39,7 @@ func NewJWTService(secretKey, refreshSecretKey, issuer string) *JWTService {
 	}
 }
 
-// GenerateAccessToken creates a new access token for a given user
+// GenerateAccessToken creates a new access token for a given repositorys
 func (s *JWTService) GenerateAccessToken(userID int64) (string, error) {
 	claims := TokenClaims{
 		UserID: userID,
@@ -53,7 +53,7 @@ func (s *JWTService) GenerateAccessToken(userID int64) (string, error) {
 	return token.SignedString([]byte(s.secretKey))
 }
 
-// GenerateRefreshToken creates a new refresh token for a given user
+// GenerateRefreshToken creates a new refresh token for a given repositorys
 func (s *JWTService) GenerateRefreshToken(userID int64) (string, error) {
 	claims := TokenClaims{
 		UserID: userID,
