@@ -7,8 +7,8 @@ import (
 
 	"github.com/bohexists/auth-manager-svc/config"
 	"github.com/bohexists/auth-manager-svc/database/migration"
+	"github.com/bohexists/auth-manager-svc/internal/repositorys"
 	"github.com/bohexists/auth-manager-svc/internal/services"
-	"github.com/bohexists/auth-manager-svc/internal/user"
 	"github.com/bohexists/auth-manager-svc/transport/http/handlers"
 	"github.com/bohexists/auth-manager-svc/transport/http/middleware"
 	"github.com/bohexists/auth-manager-svc/transport/http/router"
@@ -33,7 +33,7 @@ func main() {
 
 	// Initialize repositories and services
 	log.Println("Initializing repositories and services...")
-	userRepo := user.NewUserRepository(db)
+	userRepo := repositorys.NewUserRepository(db)
 	JWTService := services.NewJWTService(cfg)
 	authService := services.NewAuthService(userRepo, JWTService)
 

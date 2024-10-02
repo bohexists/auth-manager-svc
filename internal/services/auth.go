@@ -4,52 +4,60 @@ import (
 	"errors"
 
 	"github.com/bohexists/auth-manager-svc/domain"
-	"github.com/bohexists/auth-manager-svc/internal/user"
+	"github.com/bohexists/auth-manager-svc/internal/repositorys"
 )
 
-// AuthServiceInterface определяет интерфейс для AuthService
+// AuthServiceInterface defines the interface for AuthService
 type AuthServiceInterface interface {
 	Register(user *domain.User) error
 	Login(email, password string) (*domain.User, error)
 }
 
+// UserRepositoryInterface defines the interface for UserRepository
+type UserRepositoryInterface interface {
+	Create(user *domain.User) error
+	FindByEmail(email string) (*domain.User, error)
+}
+
+// AuthService is a service for repositorys authentication
 type AuthService struct {
-	userRepo     user.UserRepositoryInterface
+	userRepo     UserRepositoryInterface
 	tokenService JWTServiceInterface
 }
 
-func NewAuthService(userRepo user.UserRepositoryInterface, tokenService JWTServiceInterface) *AuthService {
+// NewAuthService creates a new instance of AuthService
+func NewAuthService(userRepo repositorys.UserRepositoryInterface, tokenService JWTServiceInterface) *AuthService {
 	return &AuthService{
 		userRepo:     userRepo,
 		tokenService: tokenService,
 	}
 }
 
-// Register handles user registration logic
+// Register handles repositorys registration logic
 func (s *AuthService) Register(user *domain.User) error {
-	// Check if a user with the given email already exists
+	// Check if a repositorys with the given email already exists
 	_, err := s.userRepo.FindByEmail(user.Email)
 	if err == nil {
-		return errors.New("user already exists")
+		return errors.New("repositorys already exists")
 	}
 
-	// Hash the user's password before saving
+	// Hash the repositorys's password before saving
 	if err := user.HashPassword(); err != nil {
 		return err
 	}
 
-	// Save the new user to the database
+	// Save the new repositorys to the database
 	return s.userRepo.Create(user)
 }
 
-// Login handles user authentication logic
+// Login handles repositorys authentication logic
 func (s *AuthService) Login(email, password string) (*domain.User, error) {
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
-		return nil, errors.New("user not found")
+		return nil, errors.New("repositorys not found")
 	}
 
-	// Verify the user's password
+	// Verify the repositorys's password
 	if err := user.CheckPassword(password); err != nil {
 		return nil, errors.New("invalid password")
 	}

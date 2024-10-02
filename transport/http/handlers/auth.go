@@ -22,7 +22,7 @@ func NewAuthHandler(authService *services.AuthService, JWTService *services.JWTS
 
 }
 
-// Register handles user registration requests
+// Register handles repositorys registration requests
 func (h *AuthHandler) Register(c *gin.Context) {
 	var user domain.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -30,13 +30,13 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Call the services layer to register the user
+	// Call the services layer to register the repositorys
 	if err := h.authService.Register(&user); err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "user created successfully"})
+	c.JSON(http.StatusCreated, gin.H{"message": "repositorys created successfully"})
 }
 
 // Login with JWT token generation
@@ -51,7 +51,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Call the services layer to login the user
+	// Call the services layer to login the repositorys
 	user, err := h.authService.Login(request.Email, request.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

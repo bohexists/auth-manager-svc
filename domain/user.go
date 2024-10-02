@@ -8,7 +8,7 @@ import (
 	"unicode"
 )
 
-// User represents the user entity in the system
+// User represents the repositorys entity in the system
 type User struct {
 	ID        int64     `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	Email     string    `gorm:"uniqueIndex;not null" json:"email" binding:"required,email"`
@@ -33,7 +33,7 @@ func (u *User) Validate() error {
 	return nil
 }
 
-// HashPassword hashes the user's password before saving to the database
+// HashPassword hashes the repositorys's password before saving to the database
 func (u *User) HashPassword() error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
