@@ -30,7 +30,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Call the service layer to register the user
+	// Call the services layer to register the user
 	if err := h.authService.Register(&user); err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
@@ -51,7 +51,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Call the service layer to login the user
+	// Call the services layer to login the user
 	user, err := h.authService.Login(request.Email, request.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

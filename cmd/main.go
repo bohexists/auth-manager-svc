@@ -38,7 +38,7 @@ func main() {
 	authService := services.NewAuthService(userRepo, JWTService)
 
 	// Initialize handlers
-	authHandler := handlers.NewAuthHandler(authService)
+	authHandler := handlers.NewAuthHandler(authService, JWTService)
 
 	// Initialize JWT middleware
 	jwtMiddleware := middleware.JWTAuthMiddleware(JWTService)
